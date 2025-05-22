@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const Header = ({ search, setSearch }) => {
   return (
-    <View style={styles.header}>
+    <View style={styles.header} >
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -27,13 +27,14 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
+    
     alignItems: 'center',
     borderColor: '#ffaf08',
     borderWidth: 2,
     borderTopLeftRadius: 50,
-    borderBottomLeftRadius: 5,
-    borderTopRightRadius: 50,
-    borderBottomRightRadius: 5,
+    borderBottomLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 50,
     paddingHorizontal: 22,
     paddingVertical: 11,
     width: 244,

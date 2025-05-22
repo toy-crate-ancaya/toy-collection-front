@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   themeToggle: {
     position: 'absolute',
     top: 40,
-    right: 15,
+    right: 45,
     zIndex: 1,
   },
   themeIcon: {
