@@ -12,15 +12,15 @@ export default function ToyCard({ toy, onEdit, onDelete }) {
 
       <View style={styles.content}>
         {/* Imagem do brinquedo */}
-        <Image source={toy.image} style={styles.image} />
+        <Image source={{uri:toy.toyFileUrl}} style={styles.image} />
 
         {/* Informações do brinquedo */}
         <View style={styles.info}>
-          <Text style={styles.name}>{toy.name}</Text>
-          <Text style={styles.description} numberOfLines={2}>{toy.description}</Text>
+          <Text style={styles.name}>{toy.toyName}</Text>
+          <Text style={styles.description} numberOfLines={2}>{toy.toyObjective}</Text>
           <Text style={styles.label}>Novo</Text>
-          <Text style={styles.category}>{toy.category}</Text>
-          <Text style={styles.price}>{toy.price}</Text>
+          <Text style={styles.category}>{toy.toyCondition}</Text>
+          <Text style={styles.price}>{toy.toyPrice}</Text>
 
           {/* Botões Editar e Excluir */}
           <View style={styles.buttons}>
