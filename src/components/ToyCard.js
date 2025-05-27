@@ -2,40 +2,83 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function ToyCard({ toy, onEdit, onDelete }) {
+export default function ToyCard({ toy, onEdit, onDelete, onLike, onUnlike, onView }) {
+  const handleCardPress = () => {
+    onView();
+  };
+  
   return (
-    <View style={styles.cardContainer}>
-      {/* Botão de compartilhar no canto superior direito */}
-      <TouchableOpacity style={styles.shareButton}>
-        <Ionicons name="share-social-outline" size={20} color="#7b2cbf" />
-      </TouchableOpacity>
+    <TouchableOpacity onPress={handleCardPress}>
+      <View style={styles.cardContainer}>
+        {/* Botões de interação no canto superior direito */}
+        <View style={styles.actionButtons}>
+          {/* Botão de Like */}
+          <TouchableOpacity style={styles.actionButton} onPress={onLike}>
+            <Ionicons 
+              name="heart" 
+              size={20} 
+              color="#ff4b6e"
+            />
+            <Text style={styles.actionText}>{toy.toyLikes || 0}</Text>
+          </TouchableOpacity>
 
-      <View style={styles.content}>
-        {/* Imagem do brinquedo */}
-        <Image source={{uri:toy.toyFileUrl}} style={styles.image} />
+          {/* Botão de Unlike */}
+          <TouchableOpacity style={styles.actionButton} onPress={onUnlike}>
+            <Ionicons 
+              name="heart-dislike" 
+              size={20} 
+              color="#666"
+            />
+          </TouchableOpacity>
 
-        {/* Informações do brinquedo */}
-        <View style={styles.info}>
-          <Text style={styles.name}>{toy.toyName}</Text>
-          <Text style={styles.description} numberOfLines={2}>{toy.toyObjective}</Text>
-          <Text style={styles.label}>Novo</Text>
-          <Text style={styles.category}>{toy.toyCondition}</Text>
-          <Text style={styles.price}>{toy.toyPrice}</Text>
+          {/* Visualizações */}
+          <View style={styles.actionButton}>
+            <Ionicons name="eye-outline" size={20} color="#7b2cbf" />
+            <Text style={styles.actionText}>{toy.toyViews || 0}</Text>
+          </View>
 
-          {/* Botões Editar e Excluir */}
-          <View style={styles.buttons}>
-            <TouchableOpacity style={styles.buttonEdit} onPress={onEdit}>
-              <Ionicons name="pencil" size={15} color="#fff" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Editar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonDelete} onPress={onDelete}>
-              <Ionicons name="trash" size={15} color="#fff" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Excluir</Text>
-            </TouchableOpacity>
+          {/* Popularidade */}
+          <View style={styles.actionButton}>
+            <Ionicons name="star-outline" size={20} color="#7b2cbf" />
+            <Text style={styles.actionText}>{toy.toyPopularity || 0}</Text>
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          {/* Imagem do brinquedo */}
+          <View style={styles.imageWrapper}>
+            <Image 
+              source={{uri: toy.toyFileUrl}}
+              style={styles.image}
+              resizeMode="cover"
+              onError={(e) => console.log('Erro ao carregar imagem:', e.nativeEvent.error)}
+              onLoad={() => console.log('Imagem carregada com sucesso')}
+            />
+          </View>
+
+          {/* Informações do brinquedo */}
+          <View style={styles.info}>
+            <Text style={styles.name}>{toy.toyName}</Text>
+            <Text style={styles.description} numberOfLines={2}>{toy.toyObjective}</Text>
+            <Text style={styles.label}>Novo</Text>
+            <Text style={styles.category}>{toy.toyCondition}</Text>
+            <Text style={styles.price}>R$ {toy.toyPrice}</Text>
+
+            {/* Botões Editar e Excluir */}
+            <View style={styles.buttons}>
+              <TouchableOpacity style={styles.buttonEdit} onPress={onEdit}>
+                <Ionicons name="pencil" size={15} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttonDelete} onPress={onDelete}>
+                <Ionicons name="trash" size={15} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -54,25 +97,37 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  shareButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#7b2cbf',
-    borderRadius: 5,
-    padding: 5,
-    zIndex: 1,
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 15,
+    marginBottom: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  actionText: {
+    fontSize: 12,
+    color: '#7b2cbf',
+    fontFamily: 'Poppins-Medium',
   },
   content: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  image: {
+  imageWrapper: {
     width: 80,
     height: 80,
-    borderRadius: 40, // Bordas mais arredondadas para simular o Figma
+    borderRadius: 40,
+    overflow: 'hidden',
     marginRight: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Gradiente sutil
+    backgroundColor: '#f0f0f0',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   info: {
     flex: 1,

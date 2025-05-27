@@ -1,5 +1,17 @@
-*.node_modules
-*.expo
+# Dependencies
+node_modules/
 
-.node_modules
-.expo
+# Expo
+.expo/
+dist/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store

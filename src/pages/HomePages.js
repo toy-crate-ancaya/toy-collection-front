@@ -16,7 +16,7 @@ const ThemeToggle = ({ isDarkMode, setIsDarkMode }) => (
 );
 
 const HomePages = () => {
-  const { toyList, setToyList, isLoading, setIsLoading } = ToyMobileHook();
+  const { toyList, setToyList, isLoading, setIsLoading, getMyListToys } = ToyMobileHook();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -32,42 +32,95 @@ const HomePages = () => {
     toyImageUri: null, // para preview da imagem local
   });
 
-  const filteredToyList = toyList.filter((toy) =>
-    toy.toyName.toLowerCase().includes(search.toLowerCase()) &&
-    (filter === 'Todos' || toy.toyCondition === filter)
-  );
+  const filteredToyList = toyList.filter((toy) => {
+    // Primeiro aplica o filtro de busca por nome
+    const matchesSearch = toy.toyName.toLowerCase().includes(search.toLowerCase());
+
+    // Depois aplica os filtros de categoria
+    let matchesFilter = true;
+    switch (filter) {
+      case 'Em Alta':
+        matchesFilter = (toy.toyLikes || 0) > 5; // Brinquedos com mais de 5 likes
+        break;
+      case 'Mais Populares':
+        matchesFilter = (toy.toyPopularity || 0) > 7; // Brinquedos com popularidade maior que 7
+        break;
+      case 'Mais Visitados':
+        matchesFilter = (toy.toyViews || 0) > 10; // Brinquedos com mais de 10 visualizações
+        break;
+      default:
+        matchesFilter = true; // Caso 'Todos', não aplica filtro adicional
+    }
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Ordena a lista filtrada
+  const sortedToyList = [...filteredToyList].sort((a, b) => {
+    switch (filter) {
+      case 'Em Alta':
+        return (b.toyLikes || 0) - (a.toyLikes || 0);
+      case 'Mais Populares':
+        return (b.toyPopularity || 0) - (a.toyPopularity || 0);
+      case 'Mais Visitados':
+        return (b.toyViews || 0) - (a.toyViews || 0);
+      default:
+        return 0; // Mantém a ordem original
+    }
+  });
 
   const handleAddOrEditToy = async () => {
-    console.log("batatao")
     try {
+      // Validações básicas
+      if (!newToy.toyName.trim()) {
+        alert('O nome do brinquedo é obrigatório');
+        return;
+      }
+      if (!newToy.toyObjective.trim()) {
+        alert('O objetivo do brinquedo é obrigatório');
+        return;
+      }
+      if (!newToy.toyCondition) {
+        alert('A condição do brinquedo é obrigatória');
+        return;
+      }
+      if (!newToy.toyPrice || newToy.toyPrice <= 0) {
+        alert('O preço do brinquedo deve ser maior que zero');
+        return;
+      }
+
       setIsLoading(true);
       const formData = new FormData();
-      formData.append('toyName', newToy.toyName);
-      formData.append('toyObjective', newToy.toyObjective);
-     
-       if (newToy.toyMultipartFile && newToy.toyMultipartFile.uri) {
-  formData.append('toyMultipartFile', {
-    uri: newToy.toyMultipartFile.uri,
-    type: newToy.toyMultipartFile.type || 'image/jpeg',
-    name: newToy.toyMultipartFile.fileName || 'photo.jpg',
-  });
-} else {
-  console.warn("Nenhuma imagem selecionada.");
-}
       
-      formData.append('toyCondition', newToy.toyCondition);
-      formData.append('toyPrice', newToy.toyPrice);
-      formData.append('toyLikes', 0);
-      formData.append('toyViews',0);
-      formData.append('toyPopularity', 0);
-    
+      // Garantindo que os dados são strings
+      formData.append('toyName', String(newToy.toyName).trim());
+      formData.append('toyObjective', String(newToy.toyObjective).trim());
+      formData.append('toyCondition', String(newToy.toyCondition));
+      formData.append('toyPrice', String(newToy.toyPrice));
+      formData.append('toyLikes', '0');
+      formData.append('toyViews', '0');
+      formData.append('toyPopularity', '0');
+      
+      // Adicionando a imagem se existir
+      if (newToy.toyMultipartFile && newToy.toyMultipartFile.uri) {
+        const imageFile = {
+          uri: newToy.toyMultipartFile.uri,
+          type: newToy.toyMultipartFile.type || 'image/jpeg',
+          name: newToy.toyMultipartFile.fileName || 'image.jpg'
+        };
+        formData.append('toyMultipartFile', imageFile);
+      }
+
+      console.log('FormData sendo enviado:', formData);
 
       if (currentToy) {
-        const response = await api.put(`/toy/update/${currentToy.toyId}`, formData);
-        setToyList(toyList.map((toy) => (toy.toyId === currentToy.toyId ? response.data : toy)));
+        await api.put(`/toy/update/${currentToy.toyId}`, formData);
+        await getMyListToys(); // Atualiza a lista após editar
+        alert('Brinquedo atualizado com sucesso!');
       } else {
-        const response = await api.post('/toy/create', formData);
-        setToyList([...toyList, response.data]);
+        await api.post('/toy/create', formData);
+        await getMyListToys(); // Atualiza a lista após criar
+        alert('Brinquedo criado com sucesso!');
       }
 
       setModalVisible(false);
@@ -81,7 +134,9 @@ const HomePages = () => {
       });
       setCurrentToy(null);
     } catch (error) {
-      console.error('Erro ao salvar brinquedo:', error);
+      console.error('Erro detalhado ao salvar brinquedo:', error);
+      console.error('Resposta do servidor:', error.response?.data);
+      alert(`Erro ao ${currentToy ? 'atualizar' : 'criar'} brinquedo: ${error.response?.data?.message || error.message || 'Erro desconhecido'}`);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +146,7 @@ const HomePages = () => {
     try {
       setIsLoading(true);
       await api.delete(`/toy/delete/${currentToy.toyId}`);
-      setToyList(toyList.filter((toy) => toy.toyId !== currentToy.toyId));
+      await getMyListToys(); // Atualiza a lista após deletar
       setDeleteModalVisible(false);
       setCurrentToy(null);
     } catch (error) {
@@ -101,29 +156,102 @@ const HomePages = () => {
     }
   };
 
+  const handleViewToy = async (toyId) => {
+    try {
+      const currentToyData = toyList.find(toy => toy.toyId === toyId);
+      if (!currentToyData) return;
+
+      const formData = new FormData();
+      formData.append('toyName', currentToyData.toyName);
+      formData.append('toyObjective', currentToyData.toyObjective);
+      formData.append('toyCondition', currentToyData.toyCondition);
+      formData.append('toyPrice', String(currentToyData.toyPrice));
+
+      console.log('Enviando dados de visualização:', { toyId, formData });
+      const response = await api.put(`/toy/update/${toyId}?view=true`, formData);
+      console.log('Resposta da visualização:', response.data);
+      await getMyListToys();
+    } catch (error) {
+      console.error('Erro ao registrar visualização:', error);
+      if (error.response) {
+        console.error('Detalhes do erro:', error.response.data);
+      }
+    }
+  };
+
   const handleLikeToy = async (toyId) => {
     try {
-      const response = await api.put(`/toy/update/${toyId}?like=true`, new FormData());
-      setToyList(toyList.map((toy) => (toy.toyId === toyId ? response.data : toy)));
+      const currentToyData = toyList.find(toy => toy.toyId === toyId);
+      if (!currentToyData) return;
+
+      const formData = new FormData();
+      formData.append('toyName', currentToyData.toyName);
+      formData.append('toyObjective', currentToyData.toyObjective);
+      formData.append('toyCondition', currentToyData.toyCondition);
+      formData.append('toyPrice', String(currentToyData.toyPrice));
+
+      console.log('Enviando dados de like:', { toyId, formData });
+      const response = await api.put(`/toy/update/${toyId}?like=true`, formData);
+      console.log('Resposta do like:', response.data);
+      
+      // Atualiza a lista imediatamente
+      const updatedToyList = toyList.map(toy => {
+        if (toy.toyId === toyId) {
+          return {
+            ...toy,
+            toyLikes: (toy.toyLikes || 0) + 1,
+            toyPopularity: (toy.toyPopularity || 0) + 1
+          };
+        }
+        return toy;
+      });
+      setToyList(updatedToyList);
+      
+      // Atualiza com o servidor
+      await getMyListToys();
     } catch (error) {
       console.error('Erro ao dar like:', error);
+      if (error.response) {
+        console.error('Detalhes do erro:', error.response.data);
+      }
     }
   };
 
   const handleUnlikeToy = async (toyId) => {
     try {
-      const response = await api.put(`/toy/update/${toyId}?unlike=true`, new FormData());
-      setToyList(toyList.map((toy) => (toy.toyId === toyId ? response.data : toy)));
+      const currentToyData = toyList.find(toy => toy.toyId === toyId);
+      if (!currentToyData) return;
+
+      const formData = new FormData();
+      formData.append('toyName', currentToyData.toyName);
+      formData.append('toyObjective', currentToyData.toyObjective);
+      formData.append('toyCondition', currentToyData.toyCondition);
+      formData.append('toyPrice', String(currentToyData.toyPrice));
+
+      console.log('Enviando dados de unlike:', { toyId, formData });
+      const response = await api.put(`/toy/update/${toyId}?unlike=true`, formData);
+      console.log('Resposta do unlike:', response.data);
+      
+      // Atualiza a lista imediatamente
+      const updatedToyList = toyList.map(toy => {
+        if (toy.toyId === toyId) {
+          return {
+            ...toy,
+            toyLikes: Math.max(0, (toy.toyLikes || 0) - 1),
+            toyPopularity: Math.max(0, (toy.toyPopularity || 0) - 1)
+          };
+        }
+        return toy;
+      });
+      setToyList(updatedToyList);
+      
+      // Atualiza com o servidor
+      await getMyListToys();
     } catch (error) {
       console.error('Erro ao remover like:', error);
-    }
-  };
-
-  const handleViewToy = async (toyId) => {
-    try {
-      await api.put(`/toy/update/${toyId}?view=true`, new FormData());
-    } catch (error) {
-      console.error('Erro ao registrar visualização:', error);
+      if (error.response) {
+        console.error('Detalhes do erro:', error.response.data);
+      }
     }
   };
 
@@ -157,7 +285,7 @@ const HomePages = () => {
       </View>
 
       <FlatList
-        data={filteredToyList}
+        data={sortedToyList}
         renderItem={({ item }) => (
           <ToyCard
             toy={item}
@@ -185,7 +313,7 @@ const HomePages = () => {
         keyExtractor={(item) => item.toyId.toString()}
         style={styles.list}
         refreshing={isLoading}
-        onRefresh={() => {}}
+        onRefresh={getMyListToys}
       />
 
       <AddEditModal

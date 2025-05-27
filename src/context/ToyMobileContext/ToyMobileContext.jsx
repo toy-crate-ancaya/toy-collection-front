@@ -29,7 +29,7 @@ export function ToyMobileProvider({ children }) {
     }, [])
 
     return (
-        <ToyMobileContext.Provider value={{ toyList, setToyList, isLoading, setIsLoading }}>
+        <ToyMobileContext.Provider value={{ toyList, setToyList, isLoading, setIsLoading, getMyListToys }}>
             {isLoading && <View style={{ 
                     display: 'flex',
                     position: 'absolute',

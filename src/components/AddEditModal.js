@@ -1,37 +1,140 @@
 import React from 'react';
 import { 
-  Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView 
+  Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert 
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const AddEditModal = ({ visible, setVisible, newToy, setNewToy, onSave, isEditing }) => {
 
   const handleImagePick = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Permissão para acessar a galeria é necessária!');
-      return;
+    try {
+      console.log('Iniciando seleção de imagem...');
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Status da permissão:', status);
+      
+      if (status !== 'granted') {
+        Alert.alert('Permissão Negada', 'Permissão para acessar a galeria é necessária!');
+        return;
+      }
+
+      console.log('Abrindo seletor de imagem...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+        aspect: [4, 3],
+        maxWidth: 1000,
+        maxHeight: 1000,
+      });
+
+      console.log('Resultado da seleção:', result);
+
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        console.log('Asset selecionado:', asset);
+        
+        try {
+          console.log('Iniciando fetch da imagem...');
+          const response = await fetch(asset.uri);
+          console.log('Response do fetch:', response);
+          
+          console.log('Convertendo para blob...');
+          const blob = await response.blob();
+          console.log('Tamanho do blob:', blob.size);
+          
+          const fileSize = blob.size;
+          
+          if (fileSize > 5 * 1024 * 1024) {
+            Alert.alert(
+              'Arquivo muito grande',
+              'Por favor, selecione uma imagem menor que 5MB'
+            );
+            return;
+          }
+
+          const fileExtension = asset.uri.split('.').pop()?.toLowerCase();
+          console.log('Extensão do arquivo:', fileExtension);
+          
+          const allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+          if (!allowedExtensions.includes(fileExtension)) {
+            Alert.alert(
+              'Formato inválido',
+              'Por favor, selecione uma imagem no formato JPG ou PNG'
+            );
+            return;
+          }
+
+          console.log('Atualizando estado do newToy...');
+          const newToyData = {
+            ...newToy,
+            toyMultipartFile: {
+              uri: asset.uri,
+              type: `image/${fileExtension}`,
+              fileName: `toy_image_${Date.now()}.${fileExtension}`,
+            },
+            toyImageUri: asset.uri,
+          };
+          console.log('Novo estado do toyMultipartFile:', newToyData.toyMultipartFile);
+          
+          setNewToy(newToyData);
+          console.log('Estado atualizado com sucesso');
+          
+        } catch (blobError) {
+          console.error('Erro ao processar blob:', blobError);
+          Alert.alert(
+            'Erro no processamento',
+            'Não foi possível processar a imagem selecionada'
+          );
+        }
+      } else {
+        console.log('Seleção cancelada pelo usuário');
+      }
+    } catch (error) {
+      console.error('Erro detalhado na seleção de imagem:', error);
+      console.error('Stack trace:', error.stack);
+      Alert.alert(
+        'Erro',
+        'Não foi possível selecionar a imagem. Detalhes: ' + error.message
+      );
     }
+  };
 
-   const result = await ImagePicker.launchImageLibraryAsync({
-  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  quality: 1,
-  allowsEditing: true,
-  aspect: [4, 3],
-});
+  const handleSave = () => {
+    try {
+      console.log('Iniciando validações para salvar...');
+      console.log('Estado atual do newToy:', newToy);
+      
+      if (!newToy.toyName?.trim()) {
+        Alert.alert('Erro', 'O nome do brinquedo é obrigatório');
+        return;
+      }
+      if (!newToy.toyObjective?.trim()) {
+        Alert.alert('Erro', 'O objetivo do brinquedo é obrigatório');
+        return;
+      }
+      if (!newToy.toyCondition?.trim()) {
+        Alert.alert('Erro', 'A condição do brinquedo é obrigatória');
+        return;
+      }
+      if (!newToy.toyPrice || newToy.toyPrice <= 0) {
+        Alert.alert('Erro', 'O preço deve ser maior que zero');
+        return;
+      }
+      if (!isEditing && !newToy.toyMultipartFile) {
+        Alert.alert('Erro', 'Por favor, selecione uma imagem');
+        return;
+      }
 
-if (!result.canceled) {
-  const asset = result.assets[0];
-  setNewToy({
-    ...newToy,
-    toyMultipartFile: {
-      uri: asset.uri,
-      type: asset.type || 'image/jpeg',
-      fileName: asset.fileName || asset.uri.split('/').pop(),
-    },
-    toyImageUri: asset.uri,
-  });
-}
+      console.log('Todas as validações passaram, chamando onSave...');
+      onSave();
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      Alert.alert(
+        'Erro ao salvar',
+        'Ocorreu um erro ao tentar salvar o brinquedo: ' + error.message
+      );
+    }
   };
 
   return (
@@ -103,7 +206,7 @@ if (!result.canceled) {
                 <Text style={styles.buttonCancelText}>Cancelar</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.buttonSave} onPress={onSave}>
+              <TouchableOpacity style={styles.buttonSave} onPress={handleSave}>
                 <Text style={styles.buttonSaveText}>{isEditing ? 'Salvar' : 'Adicionar'}</Text>
               </TouchableOpacity>
             </View>
