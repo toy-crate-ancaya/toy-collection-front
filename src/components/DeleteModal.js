@@ -4,14 +4,15 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 const DeleteModal = ({ visible, setVisible, onDelete }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
+      <View style={styles.blurOverlay}>
         <View style={styles.modal}>
-          <Text style={styles.text}>Tem certeza que deseja excluir este item?</Text>
-          <View style={styles.actions}>
-            <TouchableOpacity onPress={() => setVisible(false)} style={[styles.button, styles.cancelButton]}>
+          <Text style={styles.textModal}>Tem certeza que deseja excluir este item?</Text>
+          <View style={styles.containerButton}>
+            <TouchableOpacity onPress={() => setVisible(false)} style={[styles.cancelButton]}>
               <Text style={styles.buttonText}>Cancelar</Text>
+
             </TouchableOpacity>
-            <TouchableOpacity onPress={onDelete} style={[styles.button, styles.deleteButton]}>
+            <TouchableOpacity onPress={onDelete} style={[styles.deleteButton]}>
               <Text style={styles.buttonText}>Excluir</Text>
             </TouchableOpacity>
           </View>
@@ -22,7 +23,7 @@ const DeleteModal = ({ visible, setVisible, onDelete }) => {
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  blurOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
@@ -32,36 +33,40 @@ const styles = StyleSheet.create({
     width: '80%',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 20,
+    paddingLeft: 40,
+    paddingRight: 40,
+    paddingTop: 15,
+    paddingBottom: 15,
     elevation: 5,
+    alignItems: 'center',
   },
-  text: {
+  textModal: {
     fontSize: 16,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins',
     color: '#000',
     marginBottom: 20,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
-  actions: {
+  containerButton: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 10,
-  },
-  button: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
+    gap: 30,
   },
   cancelButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: 'black',
+    borderRadius: 10,
   },
   deleteButton: {
-    backgroundColor: '#7b2cbf', // Ajustado para corresponder ao Figma
+    backgroundColor: '#EF233C',
+    borderRadius: 10,
   },
   buttonText: {
     color: '#fff',
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
+    paddingHorizontal: 26,
+    paddingVertical: 10,
   },
 });
 

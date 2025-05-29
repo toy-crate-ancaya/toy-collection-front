@@ -1,57 +1,60 @@
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Component3 from './Component3';
 
 const Header = ({ search, setSearch }) => {
   return (
-    <View style={styles.header}>
-      <View style={styles.searchContainer}>
+    <View style={styles.wrapper}>
+      <Component3 />
+
+      <View style={styles.searchBar}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Pesquisar"
+          placeholder="Digite aqui..."
+          placeholderTextColor="#999"
           value={search}
           onChangeText={setSearch}
-          placeholderTextColor="#999"
         />
-        <Ionicons name="search" size={15} color="#fbbf24" style={styles.searchIcon} />
+        <Ionicons name="search" size={16} color="#ffaf08" style={styles.icon} />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
-    marginBottom: 16,
-    marginTop: 24,
+  wrapper: {
+    marginTop: 29,
+    marginBottom: 19,
     alignItems: 'center',
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#ffaf08',
-    borderWidth: 2,
-    borderTopLeftRadius: 50,
+  searchBar: {
+    width: 280,
+    height: 49,
+    borderRadius: 50,
+    borderTopRightRadius: 7,
     borderBottomLeftRadius: 5,
-    borderTopRightRadius: 50,
-    borderBottomRightRadius: 5,
+    borderWidth: 2,
+    borderColor: '#ffaf08',
     paddingHorizontal: 22,
     paddingVertical: 11,
-    width: 244,
     backgroundColor: '#fff',
-    shadowColor: '#ffaf09',
-    shadowOffset: { width: 0, height: 4 },
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#ffaf08',
     shadowOpacity: 1,
+    shadowOffset: { width: 0, height: 4 },
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 6,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    fontFamily: 'Poppins-Regular',
     color: '#000',
-    opacity: 0.5,
+    marginLeft: 8,
+    padding: 0,
   },
-  searchIcon: {
+  icon: {
     marginLeft: 8,
   },
 });

@@ -1,42 +1,100 @@
 import React from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 
-const AddEditModal = ({ visible, setVisible, newToy, setNewToy, onSave }) => {
+const AddEditModal = ({ visible, toyData, setToyData, onSave, onCancel }) => {
   return (
-    <Modal visible={visible} transparent={true} animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Editar / Adicionar Brinquedo</Text>
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Nome"
-            value={newToy.name}
-            onChangeText={text => setNewToy({ ...newToy, name: text })}
-          />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Descrição"
-            value={newToy.description}
-            onChangeText={text => setNewToy({ ...newToy, description: text })}
-          />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Categoria"
-            value={newToy.category}
-            onChangeText={text => setNewToy({ ...newToy, category: text })}
-          />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Preço"
-            value={newToy.price}
-            onChangeText={text => setNewToy({ ...newToy, price: text })}
-          />
-          <View style={styles.modalButtons}>
-            <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={onSave}>
-              <Text style={styles.modalButtonText}>Salvar</Text>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          {/* Cabeçalho */}
+          <View style={styles.header}>
+            <Text style={styles.title}>
+              {toyData?.id ? 'Editar Item' : 'Adicionar Item'}
+            </Text>
+            <TouchableOpacity onPress={onCancel} style={styles.buttonClose}>
+              <Text style={styles.x1}>✕</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setVisible(false)}>
-              <Text style={styles.modalButtonText}>Cancelar</Text>
+          </View>
+
+          {/* Conteúdo do formulário */}
+          <View style={styles.content}>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Nome</Text>
+              <TextInput
+                style={styles.input}
+                value={toyData.name}
+                onChangeText={text => setToyData({ ...toyData, name: text })}
+                placeholder="Nome"
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            <View style={styles.row}>
+              <View style={[styles.inputGroup, styles.inputSmall]}>
+                <Text style={styles.label}>Preço</Text>
+                <TextInput
+                  style={styles.input}
+                  value={toyData.price}
+                  onChangeText={text => setToyData({ ...toyData, price: text })}
+                  placeholder="R$ 0,00"
+                  placeholderTextColor="#999"
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={[styles.inputGroup, styles.inputSmall]}>
+                <Text style={styles.label}>Categoria</Text>
+                <TextInput
+                  style={styles.input}
+                  value={toyData.category}
+                  onChangeText={text => setToyData({ ...toyData, category: text })}
+                  placeholder="Categoria"
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={[styles.inputGroup, styles.inputSmall]}>
+                <Text style={styles.label}>Condição</Text>
+                <TextInput
+                  style={styles.input}
+                  value={toyData.condition}
+                  onChangeText={text => setToyData({ ...toyData, condition: text })}
+                  placeholder="Condição"
+                  placeholderTextColor="#999"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Descrição</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={toyData.description}
+                onChangeText={text => setToyData({ ...toyData, description: text })}
+                placeholder="Descrição"
+                placeholderTextColor="#999"
+                multiline
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+
+          {/* Botões */}
+          <View style={styles.buttonsRow}>
+            <TouchableOpacity style={styles.buttonSave} onPress={onSave}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.buttonCancel} onPress={onCancel}>
+              <Text style={styles.buttonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -46,53 +104,102 @@ const AddEditModal = ({ visible, setVisible, newToy, setNewToy, onSave }) => {
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // backdropFilter não existe no RN, ignorar ou usar lib externa
   },
-  modalContent: {
-    backgroundColor: '#fff',
+  modalContainer: {
+    width: 320,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(111, 178, 246, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     padding: 20,
-    borderRadius: 16,
-    width: '85%',
   },
-  modalTitle: {
-    fontSize: 20,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Poppins-Medium',
+    color: '#000',
+  },
+  buttonClose: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  x1: {
+    fontSize: 18,
+    color: '#000',
+  },
+
+  content: {
+  },
+  inputGroup: {
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
     color: '#000',
-    marginBottom: 16,
+    marginBottom: 4,
   },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+  input: {
+    height: 35,
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    fontFamily: 'Poppins-Regular',
+    borderWidth: 1,
+    borderColor: '#000000',
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: '#000',
   },
-  modalButtons: {
+  textArea: {
+    height: 80,
+  },
+
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
   },
-  modalButton: {
+  inputSmall: {
+    width: 90,
+  },
+
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  buttonSave: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#7bb8f7',
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginRight: 10,
     alignItems: 'center',
   },
-  saveButton: {
-    backgroundColor: '#7b2cbf',
+  buttonCancel: {
+    flex: 1,
+    backgroundColor: '#7bb8f7',
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginLeft: 10,
+    alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: '#9CA3AF',
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: '500',
+  buttonText: {
+    color: '#4e00000',
+    fontSize: 14,
+    fontWeight: '600',
     fontFamily: 'Poppins-Medium',
   },
 });

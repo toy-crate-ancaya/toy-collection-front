@@ -1,142 +1,123 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
-export default function ToyCard({ toy, onEdit, onDelete }) {
+const ToyCard = ({ toy, onEdit, onDelete, onLike }) => {
   return (
-    <View style={styles.cardContainer}>
-      {/* Botão de compartilhar no canto superior direito */}
-      <TouchableOpacity style={styles.shareButton}>
-        <Ionicons name="share-social-outline" size={20} color="#7b2cbf" />
+    <View style={styles.card}>
+      <Image source={toy.image} style={styles.image} />
+
+      {/* Botão curtir com imagem */}
+      <TouchableOpacity style={styles.likeButton} onPress={onLike}>
+        <Image
+          source={require('../../src/assets/rede-social 1.png')}
+          style={styles.iconImage}
+        />
       </TouchableOpacity>
 
-      <View style={styles.content}>
-        {/* Imagem do brinquedo */}
-        <Image source={toy.image} style={styles.image} />
+      <View style={styles.infoContainer}>
+        <Text style={styles.name}>{toy.name}</Text>
+        <Text style={styles.description}>{toy.description}</Text>
+        <Text style={styles.category}>{toy.category}</Text>
+        <Text style={styles.price}>{toy.price}</Text>
 
-        {/* Informações do brinquedo */}
-        <View style={styles.info}>
-          <Text style={styles.name}>{toy.name}</Text>
-          <Text style={styles.description} numberOfLines={2}>{toy.description}</Text>
-          <Text style={styles.label}>Novo</Text>
-          <Text style={styles.category}>{toy.category}</Text>
-          <Text style={styles.price}>{toy.price}</Text>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.button} onPress={onEdit}>
+            <Image
+              source={require('../../src/assets/lapis 2.png')}
+              style={styles.iconImage}
+            />
+            <Text style={styles.buttonText}>Editar</Text>
+          </TouchableOpacity>
 
-          {/* Botões Editar e Excluir */}
-          <View style={styles.buttons}>
-            <TouchableOpacity style={styles.buttonEdit} onPress={onEdit}>
-              <Ionicons name="pencil" size={15} color="#fff" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Editar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonDelete} onPress={onDelete}>
-              <Ionicons name="trash" size={15} color="#fff" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Excluir</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={onDelete}>
+            <Image
+              source={require('../../src/assets/excluir.png')}
+              style={styles.iconImage}
+            />
+            <Text style={styles.buttonText}>Excluir</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  cardContainer: {
+  card: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#c7c7c7',
-    padding: 15,
     marginBottom: 20,
+    padding: 12,
     position: 'relative',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
   },
-  shareButton: {
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 12,
+    marginRight: 15,
+  },
+  likeButton: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: '#7b2cbf',
-    borderRadius: 5,
-    padding: 5,
-    zIndex: 1,
   },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  iconImage: {
+    width: 20,
+    height: 20,
+    marginRight: 6,
+    resizeMode: 'contain',
   },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 40, // Bordas mais arredondadas para simular o Figma
-    marginRight: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Gradiente sutil
-  },
-  info: {
+  infoContainer: {
     flex: 1,
   },
   name: {
-    fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    color: '#000',
-    marginBottom: 5,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   description: {
-    fontSize: 10,
-    fontFamily: 'Poppins-Medium',
-    color: '#9747ff',
-    marginBottom: 5,
-    lineHeight: 16,
-  },
-  label: {
-    fontSize: 10,
-    fontFamily: 'Poppins-Medium',
-    color: '#9747ff',
-    marginBottom: 5,
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 2,
   },
   category: {
     fontSize: 10,
-    fontFamily: 'Poppins-Medium',
-    color: '#9747ff',
-    marginBottom: 5,
+    fontWeight: '500',
+    color: '#777',
+    marginBottom: 2,
   },
   price: {
-    fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    color: '#7b2cbf',
+    fontSize: 14,
+    fontWeight: '700',
     marginBottom: 10,
   },
-  buttons: {
+  actions: {
     flexDirection: 'row',
     gap: 10,
   },
-  buttonEdit: {
-    backgroundColor: '#7b2cbf',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+  button: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  buttonDelete: {
     backgroundColor: '#7b2cbf',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
   },
-  buttonIcon: {
-    marginRight: 5,
+  deleteButton: {
+    backgroundColor: '#6a1b9a',
   },
   buttonText: {
     color: '#fff',
-    fontWeight: '500',
-    fontSize: 11,
-    fontFamily: 'Poppins-Medium',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
+
+export default ToyCard;
