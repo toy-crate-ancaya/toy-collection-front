@@ -3,8 +3,13 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ToyCard({ toy, onEdit, onDelete, onLike, onUnlike, onView }) {
+  if (!toy || !toy.toyName) {
+    console.error('Toy inválido recebido:', toy);
+    return null;
+  }
+
   const handleCardPress = () => {
-    onView();
+    if (onView) onView();
   };
   
   return (
@@ -48,7 +53,7 @@ export default function ToyCard({ toy, onEdit, onDelete, onLike, onUnlike, onVie
           {/* Imagem do brinquedo */}
           <View style={styles.imageWrapper}>
             <Image 
-              source={{uri: toy.toyFileUrl}}
+              source={{uri: toy.toyFileUrl || 'https://via.placeholder.com/80'}}
               style={styles.image}
               resizeMode="cover"
               onError={(e) => console.log('Erro ao carregar imagem:', e.nativeEvent.error)}
@@ -59,10 +64,10 @@ export default function ToyCard({ toy, onEdit, onDelete, onLike, onUnlike, onVie
           {/* Informações do brinquedo */}
           <View style={styles.info}>
             <Text style={styles.name}>{toy.toyName}</Text>
-            <Text style={styles.description} numberOfLines={2}>{toy.toyObjective}</Text>
+            <Text style={styles.description} numberOfLines={2}>{toy.toyObjective || 'Sem descrição'}</Text>
             <Text style={styles.label}>Novo</Text>
-            <Text style={styles.category}>{toy.toyCondition}</Text>
-            <Text style={styles.price}>R$ {toy.toyPrice}</Text>
+            <Text style={styles.category}>{toy.toyCondition || 'Não especificado'}</Text>
+            <Text style={styles.price}>R$ {toy.toyPrice || 0}</Text>
 
             {/* Botões Editar e Excluir */}
             <View style={styles.buttons}>
